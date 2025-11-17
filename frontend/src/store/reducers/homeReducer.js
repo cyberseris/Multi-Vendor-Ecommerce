@@ -1,0 +1,165 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import api from "../../api/api";
+
+// get_category 用在 dispatch(get_category)
+export const get_category = createAsyncThunk(
+    'product/get_category', // get_category 用在 addCase
+    async (_, {fulfillWithValue}) => {
+        try{
+            const { data } = await api.get('/home/get-categorys');
+            return fulfillWithValue(data)
+        }catch(error){
+            console.log(error.response)
+        }
+    }
+)
+
+export const get_products = createAsyncThunk(
+    'product/get_products', 
+    async (_, {fulfillWithValue}) => {
+        try{
+            const { data } = await api.get('/home/get-products');
+            return fulfillWithValue(data)
+        }catch(error){
+            console.log(error.response)
+        }
+    }
+)
+
+export const price_range_product = createAsyncThunk(
+    'product/price_range_product', 
+    async (_, {fulfillWithValue}) => {
+        try{
+            const { data } = await api.get('/home/price-range-latest-product');
+            return fulfillWithValue(data)
+        }catch(error){
+            console.log(error.response)
+        }
+    }
+)
+
+export const product_details = createAsyncThunk(
+    'product/product_details', 
+    async (slug, {fulfillWithValue}) => {
+        try{
+            const { data } = await api.get(`/home/product-details/${slug}`);
+            return fulfillWithValue(data)
+        }catch(error){
+            console.log(error.response)
+        }
+    }
+)
+
+export const customer_review = createAsyncThunk(
+    'review/customer_review', 
+    async (info, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.post('/home/customer/submit-review', info);
+            return fulfillWithValue(data)
+        }catch(error){
+            return rejectWithValue(error.response.data)
+        }
+    }
+)
+
+export const get_reviews = createAsyncThunk(
+    'review/get_reviews', 
+    async ({productId, pageNumber}, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.get(`/home/customer/get-reviews/${productId}?pageNo=${pageNumber}`);
+            return fulfillWithValue(data)
+        }catch(error){
+            return rejectWithValue(error.response.data)
+        }
+    }
+)
+
+export const query_products = createAsyncThunk(
+    'product/query_products', 
+    async (query, {fulfillWithValue}) => {
+        try{
+            const { data } = await api.get(`/home/query-products?category=${query.category}&rating=${query.rating}&lowPrice=${query.low}&highPrice=${query.high}&sortPrice=${query.sortPrice}&pageNumber=${query.pageNumber}&perPage=${query.perPage}&searchValue=${query.searchValue ? query.searchValue:''}`);
+
+            return fulfillWithValue(data)
+        }catch(error){
+            console.log(error.response)
+        }
+    }
+)
+
+
+export const homeReducer = createSlice({
+    name: 'home',
+    initialState: {
+        successMessage:'', 
+        errorMessage:'',
+        categorys: [],
+        products: [],
+        product: {},
+        relatedProducts: [],
+        moreProducts: [],
+        totalProducts: 0, 
+        perPage: 3,
+        latest_product: [], 
+        topRated_product: [], 
+        discount_product: [],
+        priceRange: {
+            low: 0,
+            high: 0
+        },
+        totalReview: 0,
+        rating_review: [],
+        reviews: []
+    },
+    reducers: {
+        messageClear: (state) => {
+            state.errorMessage = '';
+            state.successMessage = '';
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(get_category.fulfilled, (state, { payload }) => {
+                state.categorys = payload.categorys;
+            })
+            .addCase(get_products.fulfilled, (state, { payload }) => {
+                state.products = payload.products;
+                state.latest_product = payload.latest_product;
+                state.topRated_product = payload.topRated_product;
+                state.discount_product = payload.discount_product;
+            })
+            .addCase(price_range_product.fulfilled, (state, { payload }) => {
+                state.latest_product = payload.latest_product;
+                state.priceRange = payload.priceRange;
+            })
+            .addCase(query_products.fulfilled, (state, { payload }) => {
+                state.products = payload.products;
+                state.totalProducts = payload.totalProducts;
+                state.perPage = payload.perPage;
+            })    
+            .addCase(product_details.fulfilled, (state, { payload }) => {
+                state.product = payload.product;
+                state.relatedProducts = payload.relatedProducts;
+                state.moreProducts = payload.moreProducts;
+            })  
+            .addCase(customer_review.rejected, (state, { payload }) => {
+                state.loader = false;
+                state.errorMessage = payload.error;
+            })
+            .addCase(customer_review.fulfilled, (state, { payload }) => {
+                state.loader = false;
+                state.successMessage = payload.message;
+                state.totalReview = state.productRating;
+            })
+            .addCase(get_reviews.fulfilled, (state, { payload }) => {
+                state.loader = false;
+                state.successMessage = payload.message;
+                state.reviews = payload.reviews;
+                state.totalReview = payload.totalReview;
+                state.rating_review = payload.rating_review;
+            })      
+    }
+})
+
+export const { messageClear } = homeReducer.actions; 
+export default homeReducer.reducer;

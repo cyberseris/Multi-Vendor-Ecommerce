@@ -1,0 +1,174 @@
+const { responseReturn } = require('../../utils/response');
+const sellerOrderModel = require('../../models/sellerOrderModel');
+const customerOrderModel = require('../../models/customerOrderModel');
+const cartModel = require('../../models/cartModel');
+const moment = require('moment');
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
+
+
+class orderController{
+    paymentCheck = async (id) => {
+        try{
+            const order = await customerOrderModel.findById(id)
+            if(order.payment_status === 'unpaid'){
+                await customerOrderModel.findByIdAndUpdate(id, { 
+                    delivery_status: 'cancelled' 
+                })
+                await sellerOrderModel.updateMany({ 
+                    orderId: id 
+                }, { 
+                    delivery_status: 'cancelled'  
+                })
+            }
+            return true
+        }catch(error){
+            console.log("paymentCheck error: ", error)
+            return false
+        }
+    }
+
+    place_order = async (req, res) => {
+        const { products, price, shipping_fee, shippingInfo, userId } = req.body;
+        let sellerOrderData = []
+        let cartId = []
+        const tempData = moment(Date.now()).format('LLL')
+        let customerOrderProduct = []
+
+        // 組合 customerOrder 需要的 products 資料
+        for(let i=0; i<products.length; i++){
+            const pro = products[i].products
+            for(let j=0; j<pro.length; j++){
+                const tempCusPro = pro[j].productInfo
+                console.log("tempCusPro: ", tempCusPro)
+                tempCusPro.quantity = pro[j].quantity
+                customerOrderProduct.push(tempCusPro)
+
+                if(pro[j]._id){
+                    cartId.push(pro[j]._id)
+                }
+            }
+        }
+
+        try{
+            // 建立 customerOrder 訂單
+            const order = await customerOrderModel.create({
+                customerId: userId,
+                shippingInfo,
+                products: customerOrderProduct,
+                price: price + shipping_fee,
+                payment_status: 'unpaid',
+                delivery_status: 'pending',
+                date: tempData
+            })
+
+            // 組合 sellerOrder 需要的資料
+            for(let i = 0; i < products.length; i++){
+                const pro = products[i].products
+                const pri = products[i].price
+                const sellerId = products[i].sellerId
+                const storePro = []
+
+                for(let j=0; j<pro.length; j++){
+                    const temppro = pro[j].productInfo
+                    temppro.quantity = pro[j].quantity
+                    storePro.push(temppro)
+                }
+
+                sellerOrderData.push({
+                    orderId: order.id,
+                    sellerId,
+                    products: storePro,
+                    price: pri,
+                    payment_status: 'unpaid',
+                    shippingInfo: 'Easy Main Warehourse',
+                    delivery_status: 'pending',
+                    date: tempData
+                })
+            }
+
+            // 建立 sellerOrder 訂單
+            await sellerOrderModel.insertMany(sellerOrderData);
+            for(let k=0; k<cartId.length; k++){
+                await cartModel.findByIdAndDelete(cartId[k])
+            }
+
+            setTimeout(() => {
+                this.paymentCheck(order.id)
+            }, 15000);
+
+            
+            responseReturn(res, 201, { message: 'Order Placed Successfully', orderId: order.id })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    get_orders = async (req, res) => {
+        console.log(req.params)
+        const { customerId, status } = req.params;
+
+        try{
+            let orders = []
+            if(status !== 'all'){
+                orders = await customerOrderModel.find({
+                    customerId: new ObjectId(customerId),
+                    delivery_status: status
+                })
+            }else{
+                orders = await customerOrderModel.find({
+                    customerId: new ObjectId(customerId)
+                })
+            }
+            responseReturn(res, 200, { orders })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    get_order_details = async (req, res) => {
+        const { orderId } = req.params;
+        try{
+            const order = await customerOrderModel.findById(orderId)
+            responseReturn(res, 200, { order })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    get_customer_dashboard_data = async (req, res) => {
+        const { userId } = req.params;
+
+        try{
+            const recentOrders = await customerOrderModel.find({
+                customerId: new ObjectId(userId)
+            }).limit(5)
+
+            const pendingOrders = await customerOrderModel.find({
+                customerId: new ObjectId(userId),
+                delivery_status: 'pending'
+            }).countDocuments()
+
+            const totalOrders = await customerOrderModel.find({
+                customerId: new ObjectId(userId)
+            }).countDocuments()
+
+            const cancelledOrders = await customerOrderModel.find({
+                customerId: new ObjectId(userId),
+                delivery_status: 'cancelled'
+            }).countDocuments()
+
+            responseReturn(res, 200, {
+                recentOrders,
+                pendingOrders,
+                totalOrders,
+                cancelledOrders
+            })
+
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+}
+
+module.exports = new orderController();
