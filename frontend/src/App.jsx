@@ -19,7 +19,7 @@ import Orders from './components/dashboard/Orders';
 import ChangePassword from './components/dashboard/ChangePassword';
 import Wishlist from './components/dashboard/Wishlist';
 import OrderDetails from './components/dashboard/OrderDetails';
-import Chat from './pages/Chat';
+import Chat from './components/dashboard/Chat';
 
 function App() {
     const dispatch = useDispatch()
