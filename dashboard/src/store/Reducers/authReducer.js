@@ -52,7 +52,6 @@ export const get_user_info = createAsyncThunk(
                 withCredentials:true
             });
             
-            console.log("get_user_info: ", data);
             return fulfillWithValue(data);
         }catch(error){
             console.log("get_user_info error:", error.response?.data); 

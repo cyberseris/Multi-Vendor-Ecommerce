@@ -11,15 +11,13 @@ module.exports.authMiddleware = async (req, res, next) => {
         ? authHeader.substring(7) 
         : req.cookies.accessToken;
 
-    console.log('Final token:', token);
-
     if(!token){
         console.log('No token found!');
         return res.status(409).json({error: 'Please Login First'})
     }else{
         try{
             const deCodeToken = await jwt.verify(token, process.env.JWT_SECRET);
-            console.log('Decoded token:', deCodeToken);
+            /* console.log('Decoded token:', deCodeToken); */
             req.role = deCodeToken.role
             req.id = deCodeToken.id
             next();

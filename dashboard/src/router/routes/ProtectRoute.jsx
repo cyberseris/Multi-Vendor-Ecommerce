@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom';
 
 const ProtectRoute = ({route, children}) => {
     const { role, userInfo } = useSelector(state => state.auth)
-    console.log("ProtectRoute userInfo 1:", userInfo);
 
     // 沒有 role（token），導向登入頁
     if(!role){
@@ -24,16 +23,12 @@ const ProtectRoute = ({route, children}) => {
 
     // 有 userInfo，使用後端返回的實際 role
     if(userInfo.role === route.role){
-        /* console.log("ProtectRoute userInfo 1:", userInfo); */
-        console.log("ProtectRoute userInfo 2:", userInfo);
         if(route.status){
             // userInfo.status: firefox redux
             // userInfo.status: db user status
             if(route.status === userInfo.status){
-                console.log("ProtectRoute userInfo 4:", userInfo);
                 return <Suspense fallback={null} >{children}</Suspense>
             }else{
-                console.log("ProtectRoute userInfo 3:", userInfo);
                 if(userInfo.status === 'pending'){
                     return <Navigate to='/seller/account-pending' replace />
                 }else{
@@ -43,25 +38,16 @@ const ProtectRoute = ({route, children}) => {
 
         }else{
             if(route.visibility){
-                console.log("ProtectRoute userInfo 5:", userInfo);
-                // if(route.visibility.some(r => r === userInfo.status))
                 if(route.visibility.includes(userInfo.status)){
                     return <Suspense fallback={null} >{children}</Suspense>
                 }else{
-                    console.log("ProtectRoute userInfo 6:", userInfo);
                     return <Navigate to='/seller/account-pending' replace />
                 }
             }else{
-                console.log("ProtectRoute userInfo 7:", userInfo);
                 return <Navigate to='/seller/account-pending' replace />
             }
 
         }
-
-
-    }else{
-        console.log("ProtectRoute userInfo 2:", userInfo);
-        //return <Navigate to='/unauthorized' replace />
     }
 };
 

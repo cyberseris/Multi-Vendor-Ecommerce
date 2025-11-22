@@ -10,7 +10,7 @@ const http = require('http')
 const server = http.createServer(app)
 
 app.use(cors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000','http://localhost:3001'],
     credentials: true   
 }))
 
@@ -20,8 +20,9 @@ const io = socket(server, {
       credentials: true
     }
 })
-
+// 重整頁面 allCustomer 就會不見
 let allCustomer = []
+let allSeller = []
 const add_user = (customerId,socketId,userInfo) => {
     const checkUser = allCustomer.some(u => u.customerId === customerId)
     if(!checkUser){
@@ -33,11 +34,63 @@ const add_user = (customerId,socketId,userInfo) => {
     }
 }
 
+const add_seller = (sellerId,socketId,userInfo) => {
+    const checkSeller = allSeller.some(u => u.sellerId === sellerId)
+    if(!checkSeller){
+        allSeller.push({
+            sellerId,
+            socketId,
+            userInfo
+        })
+    }
+}
+
+const findCustomer = (cusTomerId) => {
+  return allCustomer.find(c=>c.customerId === cusTomerId)
+}
+
+const findSeller = (sellerId) => {
+  console.log("findSeller sellerId:", sellerId)
+  console.log("findSeller allSeller:", allSeller)
+  console.log("findSeller allSeller.find:", allSeller.find(s=>s.sellerId === sellerId))
+  return allSeller.find(s=>s.sellerId === sellerId)
+}
+
+const remove = (socketId) => {
+  allCustomer = allCustomer.filter(c => c.socketId !== socketId)
+  allSeller = allSeller.filter(c => c.socketId !== socketId)
+} 
 
 io.on('connection', (soc) => {
   soc.on('add_user', (customerId, userInfo) => {
     add_user(customerId,soc.id,userInfo)
-/*     console.log("allCustomer: ", allCustomer) */
+    io.emit('activeSeller', allSeller)
+  })
+  soc.on('add_seller', (sellerId, userInfo) => {
+    add_seller(sellerId, soc.id, userInfo)
+
+  })
+  soc.on('send_seller_message', (msg) => {
+    /* console.log("send_seller_message: ", msg) */
+    const customer = findCustomer(msg.receiverId)
+    if(customer){
+      soc.to(customer.socketId).emit('seller_message', msg)
+    }
+  })  
+
+  soc.on('send_customer_message', (msg) => {
+      console.log("send_customer_message: ", msg)
+      const seller = findSeller(msg.receiverId)
+      console.log("send_customer_message seller: ", seller)
+      if(seller){
+        soc.to(seller.socketId).emit('customer_message', msg)
+      }
+  })
+
+  soc.on('disconnect', () => {
+      console.log('user disconnect....')
+      remove(soc.id)
+      io.emit('activeSeller', allSeller)
   })
 })
 

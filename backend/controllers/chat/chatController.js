@@ -134,7 +134,6 @@ class chatController{
     }
 
     add_customer_message = async(req, res) => {
-        console.log(req.body)
         const { userId, name, text, sellerId } = req.body
 
         try{
@@ -173,7 +172,7 @@ class chatController{
             })
 
             let myFriends2 = data2.myFriends
-            console.log("myFriends2: ", myFriends2)
+            /* console.log("myFriends2: ", myFriends2) */
             let index2 = myFriends2.findIndex(f => f.fdId === userId)
 
             while(index2 > 0){
@@ -198,6 +197,128 @@ class chatController{
         }
 
     }
+
+    add_seller_message = async(req, res) => {
+        const { sellerId, receiverId, name, text } = req.body
+
+        try{
+            const message = await sellerCustomerMessageModel.create({
+                senderName: name,
+                senderId: sellerId, 
+                receiverId: receiverId,
+                message: text 
+            })
+
+            const data = await sellerCustomerModel.findOne({
+                myId: sellerId
+            })
+
+            let myFriends = data.myFriends
+            /* console.log("myFriends: ", myFriends) */
+            let index = myFriends.findIndex(f => f.fdId === receiverId)
+            while(index > 0){
+                let temp = myFriends[index]
+                myFriends[index] = myFriends[index-1]
+                myFriends[index-1] = temp
+                index--
+            }
+
+            await sellerCustomerModel.updateOne(
+                {
+                    myId: sellerId
+                },
+                {
+                    myFriends
+                }
+            )
+
+            const data2 = await sellerCustomerModel.findOne({
+                myId: receiverId
+            })
+
+            let myFriends2 = data2.myFriends
+            /* console.log("myFriends2: ", myFriends2) */
+            let index2 = myFriends2.findIndex(f => f.fdId === sellerId)
+
+            while(index2 > 0){
+                let temp2 = myFriends2[index]
+                myFriends2[index2] = myFriends2[index2-1]
+                myFriends2[index2-1] = temp2
+                index2--
+            }
+
+            await sellerCustomerModel.updateOne(
+                {
+                    myId: receiverId
+                },
+                {
+                    myFriends2
+                }
+            )
+
+            responseReturn(res, 201, { message })
+        }catch(error){
+            responseReturn(res, 500, { error:error.message })
+        }
+
+    }
+
+    get_customers = async(req, res) => {
+        const { sellerId } = req.params
+        try{
+            const data = await sellerCustomerModel.findOne({
+                myId: sellerId
+            })
+            responseReturn(res, 200, { customers: data.myFriends })
+        }catch(error){
+            responseReturn(res, 500, error.message)
+        }
+    }
+
+    get_customers_seller_message = async(req, res) => {
+        const { customerId } = req.params
+        const { id } = req
+
+        console.log("get_customers_seller_message: ", customerId)
+        console.log("get_customers_seller_message: ", id)
+
+        try{
+            const messages = await sellerCustomerMessageModel.find({
+                $or: [
+                    {
+                        $and: [
+                            {
+                                senderId: { $eq:customerId }
+                            },
+                            {
+                                receiverId: { $eq: id }
+                            }
+                        ]
+                    },
+                    {
+                        $and: [
+                            {
+                                senderId: { $eq: id }
+                            },
+                            {
+                                receiverId: { $eq: customerId }
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            const currentCustomer = await customerModel.findById(customerId)
+
+            responseReturn(res, 200, {
+                messages,
+                currentCustomer
+            })
+        }catch(error){
+            responseReturn(res, 500, error.message)
+        }
+
+    } 
 }
 
 module.exports = new chatController()
