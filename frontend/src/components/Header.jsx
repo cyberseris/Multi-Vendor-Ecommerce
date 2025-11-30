@@ -22,8 +22,10 @@ const Header = () => {
     const [category, setCategory] = useState('')
 
     useEffect(()=>{
-        dispatch(get_wishlist(userInfo.id))
-        dispatch(get_cart_products(userInfo.id)) 
+        if(userInfo){
+            dispatch(get_wishlist(userInfo.id))
+            dispatch(get_cart_products(userInfo.id)) 
+        }
     }, [])
 
     const search = () => {

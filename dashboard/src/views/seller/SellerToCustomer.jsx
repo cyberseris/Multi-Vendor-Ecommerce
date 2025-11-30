@@ -10,8 +10,9 @@ import { socket } from '../../utils/utils'
 const SellerToCustomer = () => {
     const scrollRef = useRef()
     const [show, setShow] = useState(false)
-    const sellerId = 65
+    /* const sellerId = 65 */
     const { userInfo } = useSelector(state => state.auth)
+    const sellerId = userInfo._id
     const { customers, currentCustomer, messages, successMessage } = useSelector(state => state.chat)
     const dispatch = useDispatch()
     const [text, setText] = useState('')
@@ -41,12 +42,8 @@ const SellerToCustomer = () => {
 
     useEffect(()=>{
         socket.on('customer_message', msg => {
-            console.log("customer_message: ", msg)
             setReceiverMessage(msg)
         })
-        /* socket.on('activeSeller', (customers) => {
-            setActiveCustomer(customers)
-        }) */
     },[])
 
     useEffect(()=>{

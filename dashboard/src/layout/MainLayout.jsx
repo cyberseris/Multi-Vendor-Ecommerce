@@ -3,18 +3,31 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import { socket } from '../utils/utils'
-import { useSelector } from 'react-redux'
- 
+import { useDispatch, useSelector } from 'react-redux'
+import { updateSellers, updateCustomer } from '../store/Reducers/chatReducer'
+
 const MainLayout = () => {
     const { userInfo } = useSelector(state => state.auth)
+    const dispatch = useDispatch() 
 
     useEffect(()=>{
         if(userInfo && userInfo.role === 'seller'){
+            console.log("MainLayout add_seller")
             socket.emit('add_seller', userInfo._id, userInfo)
         }else{
+            console.log("MainLayout add_admin")
             socket.emit('add_admin', userInfo)
         }
     }, [userInfo])
+
+    useEffect(() => {
+        socket.on('activeCustomer', (customers)=>{
+            dispatch(updateCustomer(customers))
+        })
+        socket.on('activeSeller', (sellers)=>{
+            dispatch(updateSellers(sellers))
+        })
+    })
 
     const [showSidebar, setShowSidebar] = useState(false)
 

@@ -6,10 +6,28 @@ import { Link, Outlet } from 'react-router-dom';
 import { IoIosHome, IoMdLogOut } from 'react-icons/io';
 import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 import { RiLockPasswordLine } from "react-icons/ri";
+import api from '../api/api';
+import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { user_reset } from '../store/reducers/authReducer'
+import { reset_count } from '../store/reducers/cartReducer'
 
 const Dashboard = () => {
     const [filterShow, setFilterShow] = useState(false)
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
 
+    const logout = async () => {
+        try{
+            await api.get('/customer/logout')
+            localStorage.removeItem('customerToken')
+            dispatch(user_reset())
+            dispatch(reset_count())
+            navigate('/login')
+        }catch(error){
+            
+        }
+    }
 
     return (
         <div>
@@ -46,7 +64,7 @@ const Dashboard = () => {
                                         <span className='text-xl'><RiLockPasswordLine /></span>
                                         <Link to='/dashboard/change-password' className='block'>Change Password</Link>
                                     </li>
-                                    <li className='flex justify-start items-center gap-2 py-2'>
+                                    <li onClick={logout} className='flex justify-start items-center gap-2 py-2'>
                                         <span className='text-xl'><IoMdLogOut /></span>
                                         <Link to='/dashboard' className='block'>Logout</Link>
                                     </li>

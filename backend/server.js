@@ -23,6 +23,8 @@ const io = socket(server, {
 // 重整頁面 allCustomer 就會不見
 let allCustomer = []
 let allSeller = []
+let admin = {}
+
 const add_user = (customerId,socketId,userInfo) => {
     const checkUser = allCustomer.some(u => u.customerId === customerId)
     if(!checkUser){
@@ -66,10 +68,16 @@ io.on('connection', (soc) => {
     add_user(customerId,soc.id,userInfo)
     io.emit('activeSeller', allSeller)
   })
-  soc.on('add_seller', (sellerId, userInfo) => {
-    add_seller(sellerId, soc.id, userInfo)
 
+  // 這邊有問題待修改, server 斷線, allSeller 會變成 []
+  soc.on('add_seller', (sellerId, userInfo) => {
+    console.log("=============add_seller===========", sellerId)
+    console.log(sellerId, soc.id, userInfo)
+    console.log("=============add_seller===========", sellerId)
+    add_seller(sellerId, soc.id, userInfo)
+    io.emit('activeSeller', allSeller)
   })
+
   soc.on('send_seller_message', (msg) => {
     /* console.log("send_seller_message: ", msg) */
     const customer = findCustomer(msg.receiverId)
@@ -79,12 +87,32 @@ io.on('connection', (soc) => {
   })  
 
   soc.on('send_customer_message', (msg) => {
-      console.log("send_customer_message: ", msg)
       const seller = findSeller(msg.receiverId)
-      console.log("send_customer_message seller: ", seller)
       if(seller){
         soc.to(seller.socketId).emit('customer_message', msg)
       }
+  })
+
+  // send_message_admin_to_seller
+  soc.on('send_message_admin_to_seller', (msg) => {
+      const seller = findSeller(msg.receiverId)
+      if(seller){
+        soc.to(seller.socketId).emit('received_admin_message', msg)
+      }
+  })
+
+  soc.on('send_message_seller_to_admin', (msg) => {
+      if(admin.socketId){
+        soc.to(admin.socketId).emit('received_seller_message', msg)
+      }
+  })
+
+  soc.on('add_admin', (adminInfo) => {
+      delete adminInfo.email
+      delete adminInfo.password
+      admin = adminInfo
+      admin.socketId = soc.id
+      io.emit('activeSeller', allSeller)
   })
 
   soc.on('disconnect', () => {
