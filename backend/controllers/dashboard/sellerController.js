@@ -50,6 +50,77 @@ class sellerController{
             responseReturn(res, 500, { error: error.message })
         }
     }
+
+    get_active_sellers = async (req, res) => {
+        let { page, perPage, searchValue } = req.query
+        page = parseInt(page)
+        perPage = parseInt(perPage)
+
+        const skipPage = perPage * (page - 1)
+        let active_sellers = []
+        let totalSeller = 0
+        try{
+            if(searchValue){
+                active_sellers = await sellerModel.find({
+                    $text: {$search: searchValue},
+                    status: 'active'
+                }).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalSeller = await sellerModel.find({
+                    $text: {$search: searchValue},
+                    status: 'active'
+                }).countDocuments()
+                responseReturn(res, 200, { totalSeller, active_sellers })
+            }else{
+                active_sellers = await sellerModel.find({
+                    status: 'active'
+                }).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalSeller = await sellerModel.find({
+                    status: 'active'
+                }).countDocuments()
+                responseReturn(res, 200, { totalSeller, active_sellers })
+            }
+        }catch(error){
+            responseReturn(res, 500, {message: error.message})
+        }
+    }
+
+    get_deactive_sellers = async (req, res) => {
+        let { page, perPage, searchValue } = req.query
+        page = parseInt(page)
+        perPage = parseInt(perPage)
+
+        const skipPage = perPage * (page - 1)
+        let deactive_sellers = []
+        let totalSeller = 0
+        try{
+            if(searchValue){
+                deactive_sellers = await sellerModel.find({
+                    $text: {$search: searchValue},
+                    status: 'deactive'
+                }).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalSeller = await sellerModel.find({
+                    $text: {$search: searchValue},
+                    status: 'deactive'
+                }).countDocuments()
+                responseReturn(res, 200, { totalSeller, deactive_sellers })
+            }else{
+                deactive_sellers = await sellerModel.find({
+                    status: 'deactive'
+                }).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalSeller = await sellerModel.find({
+                    status: 'deactive'
+                }).countDocuments()
+                responseReturn(res, 200, { totalSeller, deactive_sellers })
+            }
+        }catch(error){
+            responseReturn(res, 500, {message: error.message})
+        }
+    }
+    
 }
 
 module.exports = new sellerController()

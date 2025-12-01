@@ -1,10 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-module.exports.authMiddleware = async (req, res, next) => {
-/*     console.log('=== Auth Middleware Debug ===');
-    console.log('req.cookies:', req.cookies);
-    console.log('req.headers.authorization:', req.headers.authorization); */
-    
+module.exports.authMiddleware = async (req, res, next) => {    
     // 優先從 header 取 token，如果沒有再從 cookie 取
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.startsWith('Bearer ') 
@@ -17,7 +13,6 @@ module.exports.authMiddleware = async (req, res, next) => {
     }else{
         try{
             const deCodeToken = await jwt.verify(token, process.env.JWT_SECRET);
-            /* console.log('Decoded token:', deCodeToken); */
             req.role = deCodeToken.role
             req.id = deCodeToken.id
             next();

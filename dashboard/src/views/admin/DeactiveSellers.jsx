@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import Pagination from '../components/Pagination';
 import { FaEye } from 'react-icons/fa';
 import { IoMdCloseCircle } from 'react-icons/io';
+import { get_deactive_sellers } from '../../store/Reducers/sellerReducer'
+import { useSelector, useDispatch } from 'react-redux';
 
 const DeactiveSellers = () => {
+    const dispatch = useDispatch()
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState('');
     const [perPage, setPerPage] = useState(5);
     const state = true
     const [show, setShow] = useState(false);
+    const { deactive_sellers, totalSeller } = useSelector(state => state.seller)
+
+    useEffect(()=>{
+        const obj = {
+            perPage: parseInt(perPage),
+            page: parseInt(currentPage),
+            searchValue: searchValue
+        }
+        dispatch(get_deactive_sellers(obj))
+    }, [searchValue, currentPage, perPage])
 
     return (
         <div className='px-2 lg:px-7 pt-5'>
@@ -26,7 +39,7 @@ const DeactiveSellers = () => {
                         <option value="10">10</option>
                         <option value="15">15</option>
                     </select>
-                    <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] rounded-md text-[#d0d2d6] border border-slate-700' type="text" placeholder='search' />
+                    <input value={searchValue} onChange={(e)=> setSearchValue(e.target.value)} className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] rounded-md text-[#d0d2d6] border border-slate-700' type="text" placeholder='search' />
                 </div>
 
                 <div className='relative overflow-x-auto'>
@@ -37,27 +50,27 @@ const DeactiveSellers = () => {
                                 <th scope='col' className='py-3 px-4'>Image</th>
                                 <th scope='col' className='py-3 px-4'>Name</th>
                                 <th scope='col' className='py-3 px-4'>Email</th>
-                                <th scope='col' className='py-3 px-4'>Payment Status</th>
                                 <th scope='col' className='py-3 px-4'>Status</th>
+                                <th scope='col' className='py-3 px-4'>Payment Status</th>
                                 <th scope='col' className='py-3 px-4'>Action</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {
-                                [1,2,3,4,5].map((d, i)=> <tr key={i}>
-                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>{d}</td>
+                                deactive_sellers.map((d, i)=> <tr key={i}>
+                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>{i+1}</td>
                                 <td className='py-3 px-4 text-center font-medium whitespace-nowrap flex justify-center items-center'>
-                                    <img className='w-[45px] h-[45px]' src={`http://localhost:3000/images/category/${d}.jpg`} alt="" />
+                                    <img className='w-[45px] h-[45px]' src={d?.image} alt="" />
                                 </td>
-                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>Seris</td>
-                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>seris@gmail.com</td>
-                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>Pending</td>
-                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>Deactive</td>
+                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>{d.name}</td>
+                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>{d.email}</td>
+                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>{d.status}</td>
+                                <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>{d.payment}</td>
                                 
                                 <td className='py-3 px-4 text-center font-medium whitespace-nowrap'>
                                     <div className='flex justify-center items-center gap-4'>
-                                        <Link className='p-[6px] bg-green-500 rounded hover:shadow-lg hover:shadow-green-500/50'><FaEye /></Link>
+                                        <Link to={`/admin/dashboard/seller/details/${d._id}`} className='p-[6px] bg-green-500 rounded hover:shadow-lg hover:shadow-green-500/50'><FaEye /></Link>
                                     </div>
                                 </td>
                             </tr>)

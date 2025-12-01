@@ -8,7 +8,7 @@ import { get_seller_request } from '../../store/Reducers/sellerReducer';
 
 const SellerRequest = () => {
     const dispatch = useDispatch();
-    const { sellers, totalSeller, loader, successMessage } = useSelector(state => state.seller)
+    const { request_sellers, totalSeller, loader, successMessage } = useSelector(state => state.seller)
 
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState('');
@@ -54,7 +54,7 @@ const SellerRequest = () => {
 
                         <tbody>
                             {
-                                sellers.map((d, i)=> <tr className='border-b border-slate-700' key={i}>
+                                request_sellers.map((d, i)=> <tr className='border-b border-slate-700' key={i}>
                                 <td className='py-2 px-4 text-center font-medium whitespace-nowrap'>{i + 1}</td>
                                 <td className='py-2 px-4 text-center font-medium whitespace-nowrap'>{d.nmae}</td>
                                 <td className='py-2 px-4 text-center font-medium whitespace-nowrap'>{d.email}</td>

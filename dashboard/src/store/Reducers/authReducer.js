@@ -23,27 +23,6 @@ export const admin_login = createAsyncThunk(
     }   
 )
 
-export const seller_login = createAsyncThunk(
-    'auth/seller_login', 
-    async(info, {rejectWithValue, fulfillWithValue}) => {
-        console.log(info);
-        try{
-            const { data } = await api.post('/seller-login', info, {
-                withCredentials:true
-            });
-
-            localStorage.setItem('accessToken', data.token);
-            
-            console.log("seller_login: ", data);
-            return fulfillWithValue(data);
-
-        }catch(error){
-            console.log(error.response.data); 
-            return rejectWithValue(error.response.data);
-        }
-    }   
-)
-
 export const get_user_info = createAsyncThunk(
     'auth/get_user_info', 
     async(_, {rejectWithValue, fulfillWithValue}) => {
@@ -68,8 +47,6 @@ export const profile_info_add = createAsyncThunk(
             const { data } = await api.post('/profile-info-add', profile, {
                 withCredentials:true
             });
-            
-            console.log("profile_info_add....................: ", data);
             return fulfillWithValue(data);
         }catch(error){
             console.log("profile_info_add error:", error.response?.data); 
@@ -118,6 +95,49 @@ export const seller_register = createAsyncThunk(
     }   
 )
 
+export const seller_login = createAsyncThunk(
+    'auth/seller_login', 
+    async(info, {rejectWithValue, fulfillWithValue}) => {
+        console.log(info);
+        try{
+            const { data } = await api.post('/seller-login', info, {
+                withCredentials:true
+            });
+
+            localStorage.setItem('accessToken', data.token);
+            
+            console.log("seller_login: ", data);
+            return fulfillWithValue(data);
+
+        }catch(error){
+            console.log(error.response.data); 
+            return rejectWithValue(error.response.data);
+        }
+    }   
+)
+
+export const logout = createAsyncThunk(
+    'auth/logout', 
+    async({navigate, role}, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.get('/logout', {
+                withCredentials:true
+            });
+
+            localStorage.removeItem('accessToken');
+            if(role === 'admin'){
+                navigate('/admin/login')
+            }else{
+                navigate('/login')
+            }
+            return fulfillWithValue(data);
+        }catch(error){
+            console.log(error.response.data); 
+            return rejectWithValue(error.response.data);
+        }
+    }   
+)
+
 const returnRole = (token) => {
     if(token){
         const decodeToken = jwtDecode(token)
@@ -129,10 +149,6 @@ const returnRole = (token) => {
         }else{
             return decodeToken.role
         }
-
-        console.log(jwtDecode(decodeToken))
-    }else{
-
     }
 }
 

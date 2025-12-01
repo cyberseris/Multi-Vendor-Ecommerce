@@ -126,6 +126,97 @@ class orderController{
         }
     }
 
+    get_admin_orders = async (req, res) => {
+        console.log("req.query: ", req.query)
+        let { page, perPage, searchValue } = req.query;
+        page = parseInt(page)
+        perPage = parseInt(perPage)
+        const skipPage = perPage * (page - 1)
+
+        try{
+            let orders = []
+            let totalOrders = 0
+            if(searchValue){
+                orders = await customerOrderModel.aggregate([
+                    {
+                        $text: searchValue,
+                        $lookup: {
+                            from: 'sellerorders',
+                            localField: '_id',  //customerorders id 
+                            foreignField: 'orderId',    //sellerorders order 
+                            as: 'suborder'
+                        }
+                    }
+                ]).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalOrders = await customerOrderModel.aggregate([
+                    {
+                        $text: searchValue,
+                        $lookup: {
+                            from: 'sellerorders',
+                            localField: '_id',  //customerorders id 
+                            foreignField: 'orderId',    //sellerorders order 
+                            as: 'suborder'
+                        }
+                    }
+                ])
+            }else{
+                orders = await customerOrderModel.aggregate([
+                    {
+                        $lookup: {
+                            from: 'sellerorders',
+                            localField: '_id',  //customerorders id 
+                            foreignField: 'orderId',    //sellerorders order 
+                            as: 'suborder'
+                        }
+                    }
+                ]).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalOrders = await customerOrderModel.aggregate([
+                    {
+                        $lookup: {
+                            from: 'sellerorders',
+                            localField: '_id',  //customerorders id 
+                            foreignField: 'orderId',    //sellerorders order 
+                            as: 'suborder'
+                        }
+                    }
+                ])
+            }
+
+            responseReturn(res, 200, { orders, totalOrders: totalOrders.length })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    get_admin_order = async (req, res) => {
+        const { orderId } = req.params
+                
+        try{
+            const order = await customerOrderModel.aggregate([
+                {
+                    $match: {_id: new ObjectId(orderId)},
+                },
+                {
+                    $lookup: {
+                        from: 'sellerorders',
+                        localField: '_id',  //customerorders id 
+                        foreignField: 'orderId',    //sellerorders order 
+                        as: 'suborder'
+                    }
+                }]
+            )
+
+            console.log("order: ", order)
+
+            responseReturn(res, 200, { order: order[0] })
+        }catch(error){
+            console.log(error)
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
     get_order_details = async (req, res) => {
         const { orderId } = req.params;
         try{
@@ -134,6 +225,22 @@ class orderController{
         }catch(error){
             responseReturn(res, 500, { error: error.message })
         }
+    }
+
+    admin_order_status_update = async (req, res) => {
+        const { orderId } = req.params
+        const { status } = req.body
+
+        try{
+            await customerOrderModel.findByIdAndUpdate(
+                orderId,
+                {delivary_status: status}
+            )
+            responseReturn(res, 200, {message: 'Order status updates successfully'})
+        }catch(error){
+            responseReturn(res, 500, {message: error.message})
+        }
+
     }
 
     get_customer_dashboard_data = async (req, res) => {

@@ -115,6 +115,7 @@ class authControllers{
                 responseReturn(res, 201, {token, message: 'Register Success'})
             }
         }catch(err){
+            console.log(err.message)
             responseReturn(res, 500, { error: 'Internal Server Error' })
         }
 
@@ -217,6 +218,18 @@ class authControllers{
 
         })
         
+    }
+
+    logout = async (req, res) => {
+        try{
+            res.cookie('accessToken', null, {
+                expires: new Date(Date.now()),
+                httpOnly: true
+            })
+            responseReturn(res, 200, {message: 'logout Success'})
+        }catch(error){
+            responseReturn(res, 500, {error: error.message})
+        }
     }
 }
 
