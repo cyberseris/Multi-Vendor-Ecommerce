@@ -86,7 +86,7 @@ const OrderDetails = () => {
                                                 <h2>{ p.name }</h2>
                                                 <p>
                                                     <span>Brand: </span>
-                                                    <span>{ p.brand }</span>
+                                                    <span>{ p.brand} </span>
                                                     <span className='text-lg'>Quantity:{ p.quantity }</span>
                                                 </p>
                                             </div>
@@ -117,7 +117,7 @@ const OrderDetails = () => {
                                                 <h2>{p.name}</h2>
                                                 <p>
                                                     <span>Brand: </span>
-                                                    <span>{p.brand}</span>
+                                                    <span>{p.brand} </span>
                                                     <span className='text-lg'>Quantity:{p.quantity}</span>
                                                 </p>
                                             </div>

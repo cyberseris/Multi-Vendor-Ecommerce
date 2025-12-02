@@ -236,11 +236,59 @@ class orderController{
                 orderId,
                 {delivary_status: status}
             )
-            responseReturn(res, 200, {message: 'Order status updates successfully'})
+            responseReturn(res, 200, {message: 'Order status updated successfully'})
         }catch(error){
             responseReturn(res, 500, {message: error.message})
         }
 
+    }
+
+    get_seller_orders = async (req, res) => {
+        const { sellerId } = req.params
+        let { page, perPage, searchValue } = req.query
+        console.log(sellerId, page, perPage, searchValue)
+
+        page = parseInt(page)
+        perPage = parseInt(perPage)
+        const skipPage = (page-1) * perPage
+        let orders = []
+        let totalOrders = 0
+
+        try{
+            if(searchValue){
+                orders = await sellerOrderModel.find(
+                {
+                    $text: { $search: searchValue },
+                    sellerId
+                }
+            ).skip(skipPage).limit(perPage).sort({createdAt: -1})
+
+                totalOrders = await sellerOrderModel.find(
+                    {
+                        $text: { $search: searchValue },
+                        sellerId
+                    }
+                ).countDocuments()
+            }else{
+                orders = await sellerOrderModel.find({sellerId}).skip(skipPage).limit(perPage).sort({createdAt: -1})
+                totalOrders = await sellerOrderModel.find({sellerId}).countDocuments()
+            }
+            responseReturn(res, 200, { orders, totalOrders })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    get_seller_order = async (req, res) => {
+        const { orderId } = req.params
+
+        let order = {orderId}
+        try{
+            order = await sellerOrderModel.findById(orderId)
+            responseReturn(res, 200, { order })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
     }
 
     get_customer_dashboard_data = async (req, res) => {
@@ -274,6 +322,21 @@ class orderController{
 
         }catch(error){
             responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    seller_order_status_update = async (req, res) => {
+        const { orderId } = req.params
+        const { status } = req.body
+
+        try{
+            await sellerOrderModel.findByIdAndUpdate(
+                orderId,
+                {delivery_status: status}
+            )
+            responseReturn(res, 200, {message: 'Order status updated successfully'})
+        }catch(error){
+            responseReturn(res, 500, {message: error.message})
         }
     }
 }
