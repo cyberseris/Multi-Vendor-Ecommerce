@@ -82,7 +82,6 @@ export const authReducer = createSlice({
             state.userInfo = userInfo
             state.loader = false;
             state.successMessage = payload.message;
-/*             state.token = payload.token; */
         })
                
     }

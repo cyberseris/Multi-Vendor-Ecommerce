@@ -133,6 +133,7 @@ app.use('/api', require('./routes/home/customerAuthRoutes'))
 app.use('/api', require('./routes/home/cartRoutes'))
 app.use('/api', require('./routes/order/orderRoutes'))
 app.use('/api', require('./routes/chat/chatRoutes'))
+app.use('/api', require('./routes/paymentRoutes'))
 
 const port = process.env.PORT;
 
