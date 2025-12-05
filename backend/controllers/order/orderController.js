@@ -5,7 +5,7 @@ const cartModel = require('../../models/cartModel');
 const moment = require('moment');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
-
+const stripe = require('stripe')(process.env.STRIPE_KEY)
 
 class orderController{
     paymentCheck = async (id) => {
@@ -337,6 +337,23 @@ class orderController{
             responseReturn(res, 200, {message: 'Order status updated successfully'})
         }catch(error){
             responseReturn(res, 500, {message: error.message})
+        }
+    }
+
+    create_payment = async (req, res) => {
+        const { price } = req.body
+        try{
+            const payment = await stripe.paymentIntents.create({
+                amount: price * 100,
+                currency: 'usd',
+                automatic_payment_methods: {
+                    enabled: true
+                }
+            })
+
+            responseReturn(res, 201, { clientSecret: payment.client_secret })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
         }
     }
 }

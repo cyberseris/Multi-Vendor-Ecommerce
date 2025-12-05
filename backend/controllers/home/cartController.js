@@ -222,7 +222,7 @@ class cartController{
                 cart_products: p,
                 price: calculatePrice,
                 cart_product_count: cart_product_count,
-                shipping_fee: 20 * p[0].products.length, // 運費計算,
+                shipping_fee: 2 * p[0].products.length, // 運費計算,
                 outOfStockProducts,
                 buy_product_item
             })
