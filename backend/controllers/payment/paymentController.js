@@ -135,6 +135,39 @@ class paymentController{
             responseReturn(res, 500, {message: error.message})
         }
     }
+
+    get_payment_request = async(req, res) => {
+        console.log("get_payment_request...");
+        try{
+            const withdrawalRequest = await withdrawalRequestModel.find({ status: 'pending' })
+
+            responseReturn(res, 200, {withdrawalRequest})
+        }catch(error){
+            responseReturn(res, 500, {message: error.message})
+        }
+    }
+
+    confirm_payment_request = async(req, res) => {
+        const { paymentId } = req.body
+        console.log("confirm_payment_request...", paymentId);
+        try{
+            const payment = await withdrawalRequestModel.findById(paymentId)
+            const {stripeId} =await stripeModel.findOne({sellerId: new ObjectId(payment.sellerId)})
+
+            await stripe.transfers.create({
+                amount: payment.amount,  //Stripe 金額一律用「最小貨幣單位」 1 cent 來表示, 1 USD = 100 cents, 因為是開日幣帳戶測次，所以這邊要乘以 1
+                currency: 'jpy',
+                destination: stripeId
+            })
+
+            await withdrawalRequestModel.findByIdAndUpdate(paymentId, { status: 'success'})
+            responseReturn(res, 200, { payment, message: 'Payment confirmed successfully'})
+
+        }catch(error){
+            console.log("confirm_payment_request error...", error.message);
+            responseReturn(res, 500, {message: error.message} )
+        }
+    }
 }
 
 module.exports = new paymentController()

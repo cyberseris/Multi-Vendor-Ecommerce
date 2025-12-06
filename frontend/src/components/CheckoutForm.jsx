@@ -25,12 +25,16 @@ const CheckoutForm = ({orderId}) => {
             }
         })
 
-        if(error.type === 'card_error' || error.type === 'validation_error'){
-            setMessage(error.message)
+        if(error){
+            if(error.type === 'card_error' || error.type === 'validation_error'){
+                setMessage(error.message)
+            }else{
+                setMessage('An unexpected error occured.')
+            }
+            setIsLoading(false)
         }else{
-            setMessage('An unexpected error occured.')
+            setMessage('')
         }
-        setIsLoading(false)
     }
 
     return (

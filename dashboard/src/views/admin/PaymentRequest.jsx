@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Virtuoso } from 'react-virtuoso';
+import { get_payment_request, confirm_payment_request, messageClear } from '../../store/Reducers/paymentReducer';
+import moment from 'moment/moment';
+import toast from 'react-hot-toast';
 
 function handleOnWheel(e) {
   const { deltaY } = e;
@@ -13,20 +17,46 @@ const Scroller = React.forwardRef(function Scroller({ style, ...props }, ref) {
 });
 
 const PaymentRequest = () => {
+  const dispatch = useDispatch()
+  const { pendingWithdrawals, loader, successMessage, errorMessage } = useSelector(state=>state.payment)  
+  const [ paymentId, setPaymentId ] = useState('')
+
+  useEffect(()=>{
+    dispatch(get_payment_request());
+  },[])
+  
+  const confirm_request = (id) => {
+    setPaymentId(id)
+    dispatch(confirm_payment_request(id))
+  }
+
+  useEffect(() => {
+        if(successMessage){
+            toast.success(successMessage)
+            dispatch(messageClear())
+        }
+
+        if(errorMessage){
+            toast.error(errorMessage)
+            dispatch(messageClear())
+        }
+
+  }, [successMessage, errorMessage]);
+
   const Row = (index) => {
     return (
       <div className="flex text-sm items-center min-w-[600px] text-white font-medium">
         <div className="w-[20%] p-2 whitespace-nowrap">{index + 1}</div>
-        <div className="w-[20%] p-2 whitespace-nowrap">$3434</div>
+        <div className="w-[20%] p-2 whitespace-nowrap">${pendingWithdrawals[index].amount}</div>
         <div className="w-[20%] p-2 whitespace-nowrap">
           <span className="py-[1px] px-[5px] bg-slate-300 text-blue-500 rounded-md text-sm">
-            Pending
+            {pendingWithdrawals[index].status}
           </span>
         </div>
-        <div className="w-[20%] p-2 whitespace-nowrap">25 Dec 2023</div>
+        <div className="w-[20%] p-2 whitespace-nowrap">{moment(pendingWithdrawals[index].createdAt).format('LL')}</div>
         <div className="w-[20%] p-2 whitespace-nowrap">
-          <button className="bg-indigo-500 shadow-lg hover:shadow-indigo-500/50 px-3 py-[2px] cursor-pointer text-white rounded-sm text-sm">
-            Confirm
+          <button disabled={loader} onClick={()=>confirm_request(pendingWithdrawals[index]._id)}  className="bg-indigo-500 shadow-lg hover:shadow-indigo-500/50 px-3 py-[2px] cursor-pointer text-white rounded-sm text-sm">
+            {loader && paymentId===pendingWithdrawals[index]._id ?'loading...':'Confirm'}
           </button>
         </div>
       </div>
@@ -51,7 +81,7 @@ const PaymentRequest = () => {
           {/* 清單：把 Scroller 覆寫掉，攔 onWheel */}
           <Virtuoso
             style={{ height: 350, minWidth: 600 }}
-            totalCount={100}
+            totalCount={pendingWithdrawals.length}
             itemContent={(index) => Row(index)}
             components={{ Scroller }}
           />

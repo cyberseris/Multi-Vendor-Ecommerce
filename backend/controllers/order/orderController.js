@@ -345,13 +345,23 @@ class orderController{
     create_payment = async (req, res) => {
         const { price } = req.body
         try{
+            // 測試卡號 4242 4242 4242 4242
             const payment = await stripe.paymentIntents.create({
-                amount: price * 100,
-                currency: 'usd',
+                amount: price,
+                currency: 'jpy',    // Stripe 沒有台灣選項, 創建帳戶用日本
                 automatic_payment_methods: {
                     enabled: true
                 }
             })
+
+            //目前 Stripe 餘額為 0, 開這個先灌可用餘額，灌可用餘額測試卡號用測試 4000 0037 2000 0278
+            /* const payment = await stripe.paymentIntents.create({
+                amount: price,                    // JPY 金額（單位：円）
+                currency: 'jpy',
+                payment_method: 'pm_card_bypassPendingInternational', // 避免錢變成 pending 款項，不能動用
+                payment_method_types: ['card'],   // 只用卡
+                confirm: true                     // 直接扣款
+            }); */
 
             responseReturn(res, 201, { clientSecret: payment.client_secret })
         }catch(error){

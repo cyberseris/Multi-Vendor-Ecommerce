@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import api from '../../api/api';
-import Pending from './../../views/Pending';
 
 export const get_seller_payment_details = createAsyncThunk(
     'payment/get_seller_payment_details', 
@@ -23,6 +22,38 @@ export const send_withdrawal_request = createAsyncThunk(
     async( info, {rejectWithValue, fulfillWithValue}) => {
         try{
             const { data } = await api.post('/payment/send-withdrawal-request', info, {
+                withCredentials:true
+            });
+            
+            return fulfillWithValue(data);
+        }catch(error){
+            console.log(error.response.data); 
+            return rejectWithValue(error.response.data);
+        }
+    }   
+)
+
+export const get_payment_request = createAsyncThunk(
+    'payment/get_payment_request', 
+    async(_, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.get('/payment/get-payment-request', {
+                withCredentials:true
+            });
+            
+            return fulfillWithValue(data);
+        }catch(error){
+            console.log(error.response.data); 
+            return rejectWithValue(error.response.data);
+        }
+    }   
+)
+
+export const confirm_payment_request = createAsyncThunk(
+    'payment/confirm_payment_request', 
+    async(paymentId, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.post('/payment/confirm-payment-request', {paymentId}, {
                 withCredentials:true
             });
             
@@ -79,6 +110,15 @@ export const paymentReducer = createSlice({
                 state.pendingWithdrawals = [...state.pendingWithdrawals, payload.withdrawalRequest];
                 state.availableAmount -= payload.withdrawalRequest.amount;
                 state.pendingAmount += payload.withdrawalRequest.amount;
+            })
+            .addCase(get_payment_request.fulfilled, (state, { payload }) => {
+                state.pendingWithdrawals = payload.withdrawalRequest
+            })
+            .addCase(confirm_payment_request.fulfilled, (state, { payload }) => {
+                const temp = state.pendingWithdrawals.filter(pw=>pw._id!==payload.payment._id)
+                state.pendingWithdrawals = temp
+                state.loader = false;
+                state.successMessage = payload.message;
             })
     }
 })

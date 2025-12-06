@@ -2,24 +2,6 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import api from '../../api/api';
 import { jwtDecode } from "jwt-decode";
 
-const returnRole = (token) => {
-    if(token){
-        const decodeToken = jwtDecode(token)
-        const expireTime = new Date(decodeToken.exp * 1000)
-
-        if(new Date() > expireTime){
-            localStorage.removeItem('accessToken')
-            return ''
-        }else{
-            return decodeToken.role
-        }
-
-        console.log(jwtDecode(decodeToken))
-    }else{
-
-    }
-}
-
 export const categoryReducer = createSlice({
     name: 'category',
     initialState: {

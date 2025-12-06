@@ -57,17 +57,19 @@ const Payment = () => {
         }
     }
 
-    const Row = (index) => {
+    const Row = (list, index) => {
+        const item = list[index]
+
         return (
         <div className="flex text-sm items-center min-w-600 text-white font-medium">
             <div className="w-[20%] p-2 whitespace-nowrap">{index + 1}</div>
-            <div className="w-[20%] p-2 whitespace-nowrap">${pendingWithdrawals[index]?.amount}</div>
+            <div className="w-[20%] p-2 whitespace-nowrap">${item?.amount}</div>
             <div className="w-[20%] p-2 whitespace-nowrap">
             <span className="py-[1px] px-[5px] bg-slate-300 text-blue-500 rounded-md text-sm">
-                {pendingWithdrawals[index]?.status}
+                {item?.status}
             </span>
             </div>
-            <div className="w-[20%] p-2 whitespace-nowrap">{moment(pendingWithdrawals[index]?.createdAt).format('LL')}</div>
+            <div className="w-[20%] p-2 whitespace-nowrap">{moment(item?.createdAt).format('LL')}</div>
         </div>
         );
     };
@@ -152,7 +154,7 @@ const Payment = () => {
                             <Virtuoso
                             style={{ height: 350, minWidth: 500 }}
                             totalCount={pendingWithdrawals.length}
-                            itemContent={(index) => Row(index)}
+                            itemContent={(index) => Row(pendingWithdrawals,index)}
                             components={{ Scroller }}
                             />
                         </div>
@@ -174,7 +176,7 @@ const Payment = () => {
                             <Virtuoso
                             style={{ height: 350, minWidth: 500 }}
                             totalCount={successWithdrawals.length}
-                            itemContent={(index) => Row(index)}
+                            itemContent={(index) => Row(successWithdrawals, index)}
                             components={{ Scroller }}
                             />
                         </div>
