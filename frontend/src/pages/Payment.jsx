@@ -68,11 +68,6 @@ const Payment = () => {
                             </div>
                         </div>
 
-
-                        
-
-
-
                     </div>
                 </section>
             <Footer />

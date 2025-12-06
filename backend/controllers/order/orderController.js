@@ -1,5 +1,7 @@
 const { responseReturn } = require('../../utils/response');
 const sellerOrderModel = require('../../models/sellerOrderModel');
+const myShopWalletOrderModel = require('../../models/myShopWalletModel');
+const sellerWalletModel = require('../../models/sellerWalletModel');
 const customerOrderModel = require('../../models/customerOrderModel');
 const cartModel = require('../../models/cartModel');
 const moment = require('moment');
@@ -353,6 +355,57 @@ class orderController{
 
             responseReturn(res, 201, { clientSecret: payment.client_secret })
         }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
+
+    order_confirm = async (req, res) => {
+        const { orderId } = req.params
+        console.log("order_confirm orderId: ", orderId)
+        try{
+            await customerOrderModel.findByIdAndUpdate(orderId, {
+                payment_status: 'paid'
+            })
+
+            console.log("updating seller orders...")
+            await sellerOrderModel.updateMany(
+                {
+                    orderId: new ObjectId(orderId)
+                },
+                {
+                    payment_status: 'paid',
+                    delivery_status: 'pending'
+                }
+            )
+
+            console.log("updating wallet orders...")
+            const customerOrder = await customerOrderModel.findById(orderId)
+            console.log("customerOrder after update: ", customerOrder)
+            const sellerOrder = await sellerOrderModel.find({ orderId: new ObjectId(orderId) })
+            console.log("sellerOrder after update: ", sellerOrder)
+            const time = moment(Date.now()).format('l')
+            const splitTime = time.split('/')  // month/day/year
+
+            console.log("Creating customer wallet order...")
+            await myShopWalletOrderModel.create({
+                amount: customerOrder.price,
+                month: splitTime[0],
+                year: splitTime[2]
+            })
+
+            console.log("Creating seller wallet orders...")
+            for(let i=0; i<sellerOrder.length; i++){
+                await myShopWalletOrderModel.create({
+                    sellerId: sellerOrder[i].sellerId.toString(),
+                    amount: sellerOrder[i].price,
+                    month: splitTime[0],
+                    year: splitTime[2]
+                })
+            }
+
+            responseReturn(res, 200, { message: 'Order payment confirmed successfully' })
+        }catch(error){
+            console.log("order_confirm error: ", error)
             responseReturn(res, 500, { error: error.message })
         }
     }
