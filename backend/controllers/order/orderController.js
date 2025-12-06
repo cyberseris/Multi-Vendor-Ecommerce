@@ -395,7 +395,7 @@ class orderController{
 
             console.log("Creating seller wallet orders...")
             for(let i=0; i<sellerOrder.length; i++){
-                await myShopWalletOrderModel.create({
+                await sellerWalletModel.create({
                     sellerId: sellerOrder[i].sellerId.toString(),
                     amount: sellerOrder[i].price,
                     month: splitTime[0],

@@ -43,7 +43,6 @@ export const categoryReducer = createSlice({
             .addCase(categoryAdd.rejected, (state, { payload }) => {
                 state.loader = false;
                 state.errorMessage = payload.error;
-                /* state.errorMessage = payload?.error || payload?.message || 'Login failed'; */
             })
             .addCase(categoryAdd.fulfilled, (state, { payload }) => {
                 state.loader = false;
