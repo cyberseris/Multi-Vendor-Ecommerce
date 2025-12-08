@@ -3,7 +3,6 @@ const { responseReturn } = require('../../utils/response');
 
 class sellerController{
     request_seller_get = async (req, res) => {
-        console.log(req.query)
         const {page, searchValue, perPage} = req.query  
         const skipPage = parseInt(perPage)*(parseInt(page)-1)
 

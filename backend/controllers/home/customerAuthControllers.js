@@ -7,7 +7,6 @@ const bcrypt = require('bcrypt');
 class customerAuthControllers{
     customer_register = async (req,res) => {
         const { name, email, password } = req.body
-        console.log("customer_register: ", req.body)
 
         try{
             const customer = await customerModel.findOne({ email })
@@ -56,7 +55,6 @@ class customerAuthControllers{
     }
 
     customer_login = async (req, res) => {
-        /* console.log(req.body) */
         const { email, password } = req.body
         try{
             // + 強制包含密碼欄位

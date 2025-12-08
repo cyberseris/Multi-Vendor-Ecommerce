@@ -9,7 +9,6 @@ const { ObjectId } = mongoose.Types;
 
 class homeControllers{
     formateProducts = (products) => {
-        /* console.log("Formatting products...", products) */
         const productArray = []
         let i = 0
         while(i<products.length){
@@ -25,15 +24,12 @@ class homeControllers{
             i=j
         }
 
-        /* console.log("productArray: ", productArray) */
         return productArray
     }
 
     get_categorys = async (req, res) => {
         try{
             const categorys = await categoryModel.find({})
-
-            /* console.log("Fetched categorys: ", categorys.length) */
             responseReturn(res, 200, { categorys })
         }catch(error){
             responseReturn(res, 500, { error: error.message })
@@ -53,10 +49,8 @@ class homeControllers{
             const allProduct3 = await productModel.find({}).limit(9).sort({discount: -1})
             const discount_product = this.formateProducts(allProduct3)
 
-            /* console.log("Fetched products: ", products.length) */
             responseReturn(res, 200, { products, latest_product, topRated_product, discount_product })
         }catch(error){
-            /* console.log("Error in get_products:", error.message) */
             responseReturn(res, 500, { error: error.message })
         }
     }

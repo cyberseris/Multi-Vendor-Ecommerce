@@ -6,7 +6,6 @@ const { ObjectId } = mongoose.Types;
 
 class cartController{
     add_to_cart = async (req, res) => {
-        console.log(req.body)
         const { userId, productId, quantity } = req.body 
         try{
             const product = await cartModel.findOne({
@@ -41,17 +40,12 @@ class cartController{
     add_wishlist = async (req, res) => {
         const { userId, productId, name, price, images, discount, rating, slug} = req.body;
 
-        console.log("userId: ", typeof userId)
-        console.log("productId: ", typeof productId)
-
         /* const { productId } = req.body; */
 
         try{
             const productExist = await wishlistModel.find({
                 slug
             })
-
-            console.log("productExist: ", productExist)
 
             if(productExist?.length){
                 responseReturn(res, 400, { error: 'Product already in wishlist' })  
@@ -107,18 +101,12 @@ class cartController{
     get_cart_products = async (req, res) => {
         const co = 5 // commition value 電商網站的佣金
         const { userId } = req.params;
-        console.log("=== get_cart_products START ===")
-        console.log("get_cart_products userId.....", userId)
-        console.log("userId type:", typeof userId)
         
         try{
             // 驗證 userId 是否為有效的 ObjectId
             if (!ObjectId.isValid(userId)) {
-                console.log("Invalid userId format!")
                 return responseReturn(res, 400, { error: 'Invalid userId format' })
             }
-
-            console.log("userId is valid, proceeding with aggregate...")
 
             // cart_products = { _id: XXX, userId: XXX, ..., products: [[Object]] }
             const cart_products = await cartModel.aggregate([
@@ -136,10 +124,6 @@ class cartController{
                     }
                 }
             ])
-
-/*             console.log("Aggregate completed!")
-            console.log("cart_products: ", cart_products)
-            console.log("cart_products length: ", cart_products.length) */
 
             let buy_product_item = 0
             let calculatePrice = 0
@@ -214,9 +198,6 @@ class cartController{
                     }
                 }
             }
-            
-/*             console.log("stockProducts: ", stockProducts)
-            console.log("p: ", p) */
 
             responseReturn(res, 200, {
                 cart_products: p,

@@ -9,24 +9,19 @@ const formidable = require('formidable')
 
 class authControllers{
     admin_login = async (req, res) => {
-        console.log(req.body);
-
         const {email, password} = req.body
 
         try{
             const admin = await adminModel.findOne({email}).select('+password');
 
             if(admin){
-                console.log("admin:", admin)
                 const match = await bcrypt.compare(password, admin.password); 
-                console.log(match)
 
                 if(match){
                     const token = await createToken({
                         id: admin.id,
                         role: admin.role
                     })
-                    console.log("token:", token)
                     res.cookie('accessToken', token, {
                         httpOnly: true,
                         secure: false, // 開發時 false
@@ -50,24 +45,20 @@ class authControllers{
     } 
     
     seller_login = async (req, res) => {
-        console.log(req.body);
-
         const {email, password} = req.body
 
         try{
             const seller = await sellerModel.findOne({email}).select('+password');
 
             if(seller){
-                console.log("seller:", seller)
                 const match = await bcrypt.compare(password, seller.password); 
-                console.log(match)
 
                 if(match){
                     const token = await createToken({
                         id: seller.id,
                         role: seller.role
                     })
-                    console.log("token:", token)
+
                     res.cookie('accessToken', token, {
                         httpOnly: true,
                         secure: false, // 開發時 false
@@ -91,8 +82,6 @@ class authControllers{
     } 
 
     seller_register = async (req, res) => {
-        console.log(req.body);
-
         const {email, name, password} = req.body
         try{
             const getUser = await sellerModel.findOne({email})
@@ -106,7 +95,7 @@ class authControllers{
                     method: 'manually',
                     shopInfo: {}
                 })
-                console.log("seller:", seller)
+
                 await sellerCustomerModel.create({
                     myId: seller.id,
                 })
@@ -131,8 +120,6 @@ class authControllers{
             responseReturn(res, 500, { error: 'Internal Server Error' })
         }
 
-        console.log("register", email, name, password);
-
         /* res.status(200).json({message: 'Admin login successful'}); */
     } 
 
@@ -153,7 +140,6 @@ class authControllers{
     }
 
     profile_info_add = async (req, res) => {
-        console.log("Profile info add request body: ", req.body);
         const { id } = req;
         const { division, district, shopName, sub_district } = req.body;
 
@@ -169,7 +155,6 @@ class authControllers{
             
             const userInfo = await sellerModel.findById(id)
 
-            console.log("Updated user info: ", userInfo);
             responseReturn(res, 201, { userInfo, message: 'Profile Info Added Successfully' })
         }catch(error){
             responseReturn(res, 500, { error: error.message })
@@ -178,13 +163,10 @@ class authControllers{
 
     profile_image_upload = async (req, res) => {
         const {id} = req
-         console.log("Uploading profile image for user req: ", req)
-        console.log("Uploading profile image for user ID: ", id)
+
         const form = formidable({ multiples: false })
         form.parse(req, async(err,_, files) => {
             const { image } = files
-
-            console.log("Received image file: ", image)
   
             cloudinary.config({
                 cloud_name: process.env.cloud_name,
@@ -200,8 +182,6 @@ class authControllers{
                 if(result){
                     await sellerModel.findByIdAndUpdate(id, { image: result.url })
                     const userInfo =  await sellerModel.findById(id)
-
-                    console.log("Updated user info: ", userInfo)
 
                     responseReturn(res, 201, { userInfo, message: 'Profile Image Uploaded Successfully' })
                 }else{

@@ -121,9 +121,6 @@ class paymentController{
     }
 
     send_withdrawal_request = async(req, res) => {
-        console.log("send_withdrawal_request...");
-        console.log(req.body)
-        console.log("send_withdrawal_request...");
         const { amount, sellerId }  = req.body
         try{
             const withdrawalRequest = await withdrawalRequestModel.create({
@@ -137,7 +134,6 @@ class paymentController{
     }
 
     get_payment_request = async(req, res) => {
-        console.log("get_payment_request...");
         try{
             const withdrawalRequest = await withdrawalRequestModel.find({ status: 'pending' })
 

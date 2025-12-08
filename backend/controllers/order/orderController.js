@@ -42,7 +42,6 @@ class orderController{
             const pro = products[i].products
             for(let j=0; j<pro.length; j++){
                 const tempCusPro = pro[j].productInfo
-                console.log("tempCusPro: ", tempCusPro)
                 tempCusPro.quantity = pro[j].quantity
                 customerOrderProduct.push(tempCusPro)
 
@@ -107,7 +106,6 @@ class orderController{
     }
 
     get_orders = async (req, res) => {
-        console.log(req.params)
         const { customerId, status } = req.params;
 
         try{
@@ -129,7 +127,6 @@ class orderController{
     }
 
     get_admin_orders = async (req, res) => {
-        console.log("req.query: ", req.query)
         let { page, perPage, searchValue } = req.query;
         page = parseInt(page)
         perPage = parseInt(perPage)
@@ -210,8 +207,6 @@ class orderController{
                 }]
             )
 
-            console.log("order: ", order)
-
             responseReturn(res, 200, { order: order[0] })
         }catch(error){
             console.log(error)
@@ -248,7 +243,6 @@ class orderController{
     get_seller_orders = async (req, res) => {
         const { sellerId } = req.params
         let { page, perPage, searchValue } = req.query
-        console.log(sellerId, page, perPage, searchValue)
 
         page = parseInt(page)
         perPage = parseInt(perPage)
@@ -371,13 +365,11 @@ class orderController{
 
     order_confirm = async (req, res) => {
         const { orderId } = req.params
-        console.log("order_confirm orderId: ", orderId)
         try{
             await customerOrderModel.findByIdAndUpdate(orderId, {
                 payment_status: 'paid'
             })
 
-            console.log("updating seller orders...")
             await sellerOrderModel.updateMany(
                 {
                     orderId: new ObjectId(orderId)
@@ -388,22 +380,17 @@ class orderController{
                 }
             )
 
-            console.log("updating wallet orders...")
             const customerOrder = await customerOrderModel.findById(orderId)
-            console.log("customerOrder after update: ", customerOrder)
             const sellerOrder = await sellerOrderModel.find({ orderId: new ObjectId(orderId) })
-            console.log("sellerOrder after update: ", sellerOrder)
             const time = moment(Date.now()).format('l')
             const splitTime = time.split('/')  // month/day/year
 
-            console.log("Creating customer wallet order...")
             await myShopWalletOrderModel.create({
                 amount: customerOrder.price,
                 month: splitTime[0],
                 year: splitTime[2]
             })
 
-            console.log("Creating seller wallet orders...")
             for(let i=0; i<sellerOrder.length; i++){
                 await sellerWalletModel.create({
                     sellerId: sellerOrder[i].sellerId.toString(),

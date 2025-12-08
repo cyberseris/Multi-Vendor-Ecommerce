@@ -64,9 +64,6 @@ class productController{
     }
 
     products_get = async (req, res) => {
-        console.log("products_get called")
-        console.log(req.id)
-        console.log(req.query)
         const { page, searchValue, perPage } = req.query
         const {id} = req
 
@@ -84,7 +81,6 @@ class productController{
                     sellerId: id
                 }).countDocuments()
 
-                console.log("Searched Products: ", products.length, "Total:", totalProduct)
                 responseReturn(res, 200, { products, totalProduct })
             }else{
                 const products = await productModel.find({
@@ -107,11 +103,6 @@ class productController{
 
         try{
             const product = await productModel.findById(productId)
-
-            console.log("================product_get=================")
-            console.log("product: ", product)
-            console.log("================product_get=================")
-
             responseReturn(res, 200, { product })
         }catch(error){
             responseReturn(res, 500, { error: error.message })
@@ -129,10 +120,6 @@ class productController{
             await productModel.findByIdAndUpdate(productId, { name, description, stock, price, discount, brand, slug })
 
             const product = await productModel.findById(productId)
-
-            console.log("================product_get=================")
-            console.log("product: ", product)
-            console.log("================product_get=================")
 
             responseReturn(res, 201, { product, message: 'Product Updated Successfully'})
         }catch(error){

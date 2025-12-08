@@ -1,15 +1,19 @@
 const { responseReturn } = require('../../utils/response')
 const cloudinary = require('cloudinary').v2
 const myShopWalletModel = require('../../models/myShopWalletModel')
+const sellerWalletModel = require('../../models/sellerWalletModel')
 const productModel = require('../../models/productModel')
 const customerOrderModel = require('../../models/customerOrderModel')
+const sellerOrderModel = require('../../models/sellerOrderModel')
 const sellerModel = require('../../models/sellerModel')
 const adminSellerMessageModel = require('../../models/chat/adminSellerMessageModel')
+const sellerCustomerMsgModel = require('../../models/chat/sellerCustomerMsgModel')
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
 
 class dashboardController{
     get_admin_dashboard_data = async(req, res) => {
         const {id} = req
-        console.log("==get_admin_dashboard_data==", id)
 
         try{
             const totalSale = await myShopWalletModel.aggregate([
@@ -44,6 +48,81 @@ class dashboardController{
             responseReturn(res, 500, { message: error.message })
         }
     }   
+
+    get_seller_dashboard_data = async(req, res) => {
+        const {id} = req
+
+        try{
+            const totalSale = await sellerWalletModel.aggregate([
+                {
+                    $match: {
+                        sellerId: {
+                            $eq: id
+                        }
+                    }
+                },      
+                {
+                    $group: {
+                        _id: null,
+                        totalAmount: {$sum: '$amount'}
+                    }
+                }
+            ])
+
+            const totalProduct = await productModel.find({
+                sellerId: new ObjectId(id)
+            }).countDocuments()
+            const totalOrder = await sellerOrderModel.find({
+                sellerId: new ObjectId(id)
+            }).countDocuments()
+            const totalPendingOrder = await sellerOrderModel.find({
+                $and: [
+                    {
+                        sellerId: {
+                            $eq: new ObjectId(id)
+                        }
+                    },
+                    {
+                        delivery_status: {
+                            $eq: 'pending'
+                        }
+                    }
+                ]
+
+            }).countDocuments()
+
+            const messages = await sellerCustomerMsgModel.find({
+                $or: [
+                    {
+                        senderId: {
+                            $eq: id
+                        }
+                    },
+                    {
+                        receiverId: {
+                            $eq: id
+                        }
+                    }
+                ]
+            }).limit(3)
+            const recentOrder = await sellerOrderModel.find({
+                sellerId: new ObjectId(id)
+            }).sort({createdAt: -1}).limit(5)
+
+            responseReturn(res, 200, {
+                totalProduct, 
+                totalOrder, 
+                totalPendingOrder,
+                messages, 
+                recentOrder,
+                totalSale: totalSale.length > 0 ? totalSale[0].totalAmount:0
+            })
+        }catch(error){
+            responseReturn(res, 500, { message: error.message })
+        }
+    } 
+
+    
 }
 
 module.exports = new dashboardController()

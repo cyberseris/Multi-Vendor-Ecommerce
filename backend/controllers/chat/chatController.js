@@ -150,7 +150,6 @@ class chatController{
             })
 
             let myFriends = data.myFriends
-            console.log("myFriends: ", myFriends)
             let index = myFriends.findIndex(f => f.fdId === sellerId)
             while(index > 0){
                 let temp = myFriends[index]
@@ -173,7 +172,6 @@ class chatController{
             })
 
             let myFriends2 = data2.myFriends
-            /* console.log("myFriends2: ", myFriends2) */
             let index2 = myFriends2.findIndex(f => f.fdId === userId)
 
             while(index2 > 0){
@@ -215,7 +213,6 @@ class chatController{
             })
 
             let myFriends = data.myFriends
-            /* console.log("myFriends: ", myFriends) */
             let index = myFriends.findIndex(f => f.fdId === receiverId)
             while(index > 0){
                 let temp = myFriends[index]
@@ -238,7 +235,6 @@ class chatController{
             })
 
             let myFriends2 = data2.myFriends
-            /* console.log("myFriends2: ", myFriends2) */
             let index2 = myFriends2.findIndex(f => f.fdId === sellerId)
 
             while(index2 > 0){
@@ -362,16 +358,6 @@ class chatController{
             if(receiverId){
                 currentSeller = await sellerModel.findById(receiverId)
             }
-
-            /* 11/29
-            responseReturn(res, 200, { 
-                message: messages,
-                currentSeller 
-            }) */
-
-            console.log("==============messages==============")
-            console.log(messages)
-            console.log("==============messages==============")
 
             responseReturn(res, 200, { 
                 messages,

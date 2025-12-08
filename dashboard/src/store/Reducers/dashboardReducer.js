@@ -5,7 +5,22 @@ export const get_admin_dashboard_data = createAsyncThunk(
     'dashboard/get_admin_dashboard_data', 
     async(_, {rejectWithValue, fulfillWithValue}) => {
         try{
-            const { data } = await api.get('/get-admin-dashboard-data', {
+            const { data } = await api.get('/admin/get-dashboard-data', {
+                withCredentials:true
+            });
+            
+            return fulfillWithValue(data);
+        }catch(error){
+            return rejectWithValue(error.response.data);
+        }
+    }   
+)
+
+export const get_seller_dashboard_data = createAsyncThunk(
+    'dashboard/get_seller_dashboard_data', 
+    async(_, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.get('/seller/get-dashboard-data', {
                 withCredentials:true
             });
             
@@ -45,7 +60,14 @@ export const dashboardReducer = createSlice({
                 state.recentMessage = payload.messages;
                 state.recentOrder = payload.recentOrder;
                 state.totalSale = payload.totalSale;
-                console.log("payload.messages: ", payload.messages)
+            })
+            .addCase(get_seller_dashboard_data.fulfilled, (state, { payload }) => {
+                state.totalProduct = payload.totalProduct;
+                state.totalOrder = payload.totalOrder;
+                state.totalPendingOrder = payload.totalPendingOrder;
+                state.recentMessage = payload.messages;
+                state.recentOrder = payload.recentOrder;
+                state.totalSale = payload.totalSale;
             })
     }
 })

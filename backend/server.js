@@ -52,9 +52,6 @@ const findCustomer = (cusTomerId) => {
 }
 
 const findSeller = (sellerId) => {
-  console.log("findSeller sellerId:", sellerId)
-  console.log("findSeller allSeller:", allSeller)
-  console.log("findSeller allSeller.find:", allSeller.find(s=>s.sellerId === sellerId))
   return allSeller.find(s=>s.sellerId === sellerId)
 }
 
@@ -71,9 +68,6 @@ io.on('connection', (soc) => {
 
   // 這邊有問題待修改, server 斷線, allSeller 會變成 []
   soc.on('add_seller', (sellerId, userInfo) => {
-    console.log("=============add_seller===========", sellerId)
-    console.log(sellerId, soc.id, userInfo)
-    console.log("=============add_seller===========", sellerId)
     add_seller(sellerId, soc.id, userInfo)
     io.emit('activeSeller', allSeller)
   })
@@ -116,7 +110,6 @@ io.on('connection', (soc) => {
   })
 
   soc.on('disconnect', () => {
-      console.log('user disconnect....')
       remove(soc.id)
       io.emit('activeSeller', allSeller)
   })

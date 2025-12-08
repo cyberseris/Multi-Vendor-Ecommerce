@@ -8,7 +8,6 @@ module.exports.authMiddleware = async (req, res, next) => {
         : req.cookies.accessToken;
 
     if(!token){
-        console.log('No token found!');
         return res.status(409).json({error: 'Please Login First'})
     }else{
         try{
