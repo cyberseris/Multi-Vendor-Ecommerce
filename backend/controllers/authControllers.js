@@ -28,6 +28,10 @@ class authControllers{
                     })
                     console.log("token:", token)
                     res.cookie('accessToken', token, {
+                        httpOnly: true,
+                        secure: false, // 開發時 false
+                        samesite: 'lax', 
+                        path:'/',
                         expires: new Date(Date.now()+7*24*60*60*1000)
                     })
                     responseReturn(res, 200, {token, message: "Login successful"})
@@ -65,6 +69,10 @@ class authControllers{
                     })
                     console.log("token:", token)
                     res.cookie('accessToken', token, {
+                        httpOnly: true,
+                        secure: false, // 開發時 false
+                        samesite: 'lax', 
+                        path:'/',
                         expires: new Date(Date.now()+7*24*60*60*1000)
                     })
                     responseReturn(res, 200, {token, message: "Login successful"})
@@ -109,6 +117,10 @@ class authControllers{
                 })
 
                 res.cookie('accessToken', token, {
+                    httpOnly: true,
+                    secure: false, // 開發時 false
+                    samesite: 'lax', 
+                    path:'/',
                     expires: new Date(Date.now() + 7*24*60*60*1000)
                 })
 

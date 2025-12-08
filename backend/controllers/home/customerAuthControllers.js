@@ -39,6 +39,10 @@ class customerAuthControllers{
                 }) */
 
                 res.cookie('customerToken', token, {
+                    httpOnly: true,
+                    secure: false, // 開發時 false
+                    samesite: 'lax', 
+                    path:'/',
                     expires: new Date(Date.now() + 7*24*60*60*1000)
                 })
 
@@ -67,6 +71,10 @@ class customerAuthControllers{
                         method: customer.method
                     })
                     res.cookie('customerToken', token, {
+                        httpOnly: true,
+                        secure: false, // 開發時 false
+                        samesite: 'lax', 
+                        path:'/',
                         expires: new Date(Date.now() + 7*24*60*60*1000)
                     })
 
