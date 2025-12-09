@@ -26,7 +26,7 @@ const Header = () => {
             dispatch(get_wishlist(userInfo.id))
             dispatch(get_cart_products(userInfo.id)) 
         }
-    }, [])
+    }, [userInfo])
 
     const search = () => {
         navigate(`/products/search?category=${category}&value=${searchValue}`)
@@ -100,27 +100,16 @@ const Header = () => {
 
                             }
 
-
-
                         </div>
-
-
                     </div>
                 </div>
             </div>
 
-
-
-
             <div className='w-white'>
                 <div className='w-[85%] lg:w-[90%] mx-auto'>
                     <div className='h-[80px] md-lg:h-[100px] flex justify-between items-center flex-wrap'>
-
-
                             <div className='md-lg:w-full w-3/12 md-lg:pt-4'>
                                 <div className='flex justify-between items-center'>
-
-
                                     <Link to='/'>
                                         <img src="http://localhost:3000/images/logo.png" alt="" />
                                     </Link>
@@ -168,8 +157,6 @@ const Header = () => {
                                                 }
                                                 
                                             </div>
-
-
 
                                             <div onClick={redirect_cart_page} className='relative flex justify-center items-center cursor-pointer w-[35px] h-[35px] rounded-full bg-[#e2e2e2]'>
                                                 <span className='text-xl text-green-500'><FaShoppingCart /></span>
