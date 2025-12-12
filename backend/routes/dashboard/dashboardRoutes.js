@@ -7,5 +7,11 @@ router.get('/admin/get-dashboard-data', authMiddleware, dashboardController.get_
 
 router.get('/seller/get-dashboard-data', authMiddleware, dashboardController.get_seller_dashboard_data);
 
+router.post('/banner/add', authMiddleware, dashboardController.add_banner);
+
+router.get('/banner/get/:productId', authMiddleware, dashboardController.get_banner);
+
+router.get('/banners', dashboardController.get_banners);
+
 module.exports = router;
 

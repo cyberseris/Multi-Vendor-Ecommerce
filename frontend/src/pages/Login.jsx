@@ -94,6 +94,29 @@ const Login = () => {
                                 <div className='text-center text-slate-600 pt-1'>
                                     <p>Don't Have An Account? <Link className='text-blue-500' to='/register'> Register </Link></p>
                                 </div>
+
+
+                                {/* <button className='px-8 w-full py-2 text-white bg-[#02e3e0] shadow-lg hover:shadow-red-500/40 rounded-md mb-3'>
+                                    <span>Login As a Seller</span>
+                                </button> */}
+
+                                {/* <button className='px-8 w-full py-2 text-white bg-[#ad2cc4] shadow-lg hover:shadow-red-500/40 rounded-md mb-3'>
+                                    <span>Register As a Seller</span>
+                                </button> */}
+
+                                <a target='_balnk' href="http://localhost:3001/login">
+                                    <div className='px-8 w-full py-2 bg-[#02e3e0] shadow hover:shadow-red-50 text-white rounded-md flex justify-center items-center gap-2 mb-3'>
+                                        Login As a Seller
+                                    </div>
+                                </a> 
+
+                                <a target='_balnk' href="http://localhost:3001/register">
+                                    <div className='px-8 w-full py-2 bg-[#ad2cc4] shadow hover:shadow-red-50 text-white rounded-md flex justify-center items-center gap-2 mb-3'>
+                                        Register As a Seller
+                                    </div>
+                                </a>
+
+
                             </div>
                             <div className='w-full h-full py-4 pr-4'>
                                 <img className='w-full h-full' src="http://localhost:3000/images/login.jpg" alt="" />

@@ -1,12 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import api from '../../api/api';
-import { jwtDecode } from "jwt-decode";
 
 export const categoryReducer = createSlice({
     name: 'category',
     initialState: {
-        successMessage:'',
-        errorMessage:'',
+        successMessage: '',
+        errorMessage: '',
         loader: false,
         categories: [],
         totalCategory: 0

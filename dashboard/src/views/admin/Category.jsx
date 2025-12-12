@@ -9,7 +9,6 @@ import { overrideStyle } from '../../utils/utils';
 import { categoryAdd, get_category, messageClear } from '../../store/Reducers/categoryReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import Search from '../components/Search'
-import { parse } from 'postcss';
 
 const Category = () => {
     const dispatch = useDispatch()

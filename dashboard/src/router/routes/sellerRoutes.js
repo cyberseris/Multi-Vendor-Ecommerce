@@ -4,6 +4,7 @@ import EditProduct from "../../views/seller/EditProduct"
 const Home = lazy(()=> import('../../views/Home'))
 const SellerDashboard = lazy(()=> import('../../views/seller/SellerDashboard'))
 const AddProduct = lazy(()=> import('../../views/seller/AddProduct'))
+const AddBanner = lazy(()=> import('../../views/seller/AddBanner'))
 const Products = lazy(()=> import('../../views/seller/Products'))
 const DiscountProducts = lazy(()=> import('../../views/seller/DiscountProducts'))
 const Orders = lazy(()=> import('../../views/seller/Orders'))
@@ -42,6 +43,12 @@ export const sellerRoutes = [
     {
         path: '/seller/dashboard/edit-product/:productId',
         element: <EditProduct />,
+        role: 'seller',
+        status: 'active'
+    },
+    {
+        path: '/seller/dashboard/add-banner/:productId',
+        element: <AddBanner />,
         role: 'seller',
         status: 'active'
     },

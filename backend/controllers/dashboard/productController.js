@@ -10,7 +10,7 @@ class productController{
         form.parse(req, async (err, field, files) => {
             let { name, category, description, stock, price, discount, shopName, brand } = field
 
-            const { images } = files
+            let { images } = files
             name = name.trim()
             const slug = name.split(' ').join('-')
 
@@ -26,7 +26,19 @@ class productController{
             try{
                 allImageUrl = []
 
-                if(images.length){
+                if(!Array.isArray(images)){
+                    images = [images]
+                }
+
+                for(let i=0; i<images.length; i++){
+                    result = await cloudinary.uploader.upload(images[i].filepath, {
+                        folder: 'products' 
+                    })
+
+                    allImageUrl.push(result.url)
+                }
+
+                /* if(images?.length){
                     for(let i=0; i<images.length; i++){
                         result = await cloudinary.uploader.upload(images[i].filepath, {
                         folder: 'products' 
@@ -39,7 +51,7 @@ class productController{
                        folder: 'products' 
                     })
                     allImageUrl = [...allImageUrl, result.url]
-                }
+                } */
 
 
                 await productModel.create({
