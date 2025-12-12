@@ -13,7 +13,7 @@ function App() {
     if (token) {
       dispatch(get_user_info())
     }
-  }, [token, dispatch])
+  }, [token])
   
   return (
     <>

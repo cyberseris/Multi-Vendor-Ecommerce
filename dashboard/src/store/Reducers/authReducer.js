@@ -210,17 +210,10 @@ export const authReducer = createSlice({
                 state.token = payload.token;
                 state.role = returnRole(payload.token);
             })
-            .addCase(get_user_info.pending, (state) => {
-                state.loader = true;
-            })
             .addCase(get_user_info.fulfilled, (state, { payload }) => {
                 state.loader = false;
                 state.userInfo = payload.userInfo;  // payload e.g. { userInfo: user }, 後端來的 responseReturn(res, 200, {userInfo: user})
                 state.role = payload.userInfo.role;
-            })
-            .addCase(get_user_info.rejected, (state, { payload }) => {
-                state.loader = false;
-                state.errorMessage = payload?.error || 'Failed to get user info';
             })
             .addCase(profile_image_upload.pending, (state) => {
                 state.loader = true;

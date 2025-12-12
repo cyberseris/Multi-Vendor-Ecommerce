@@ -73,7 +73,7 @@ class categoryController{
             }
 
             if(searchValue && page && perPage){
-                const categorys = await categoryModel.find({
+                const categories = await categoryModel.find({
                     $text: { $search: searchValue }
                 }).skip(skipPage).limit(parseInt(itemsPerPage)).sort({createdAt: -1}) //由新到舊
 
@@ -81,21 +81,98 @@ class categoryController{
                     $text: {$search: searchValue}
                 }).countDocuments()
 
-                responseReturn(res, 200, { categorys, totalCategory })
+                responseReturn(res, 200, { categories, totalCategory })
             }else if(searchValue==='' && page && perPage){ 
-                const categorys = await categoryModel.find({}).skip(skipPage).limit(parseInt(itemsPerPage)).sort({createdAt: -1}) //由新到舊
+                const categories = await categoryModel.find({}).skip(skipPage).limit(parseInt(itemsPerPage)).sort({createdAt: -1}) //由新到舊
                 const totalCategory = await categoryModel.find({}).countDocuments()
-
-                responseReturn(res, 200, { categorys, totalCategory })
+                console.log("searchValue===1", categories)
+                responseReturn(res, 200, { categories, totalCategory })
             }else {
-                const categorys = await categoryModel.find({}).sort({createdAt: -1}) 
+                const categories = await categoryModel.find({}).sort({createdAt: -1}) 
                 const totalCategory = await categoryModel.find({}).countDocuments()
-                responseReturn(res, 200, { categorys, totalCategory })
+                responseReturn(res, 200, { categories, totalCategory })
             }
 
         }catch(err){
             console.log("Error in get_category:", err)
             responseReturn(res, 500, { error: 'Internal Server Error' })
+        }
+    }
+
+    update_category = async (req, res) => {
+        const form = formidable()
+        form.parse(req, async (err,fields,files) => {
+            if(err){
+                responseReturn(res, 404, { error: 'something went wrong'})
+            }else{
+                // 處理 key 名稱，有些情況下會多出 ': '
+                let name = fields.name || fields['name: '] || fields['name ']
+                let image = files.image || files['image: '] || files['image ']
+                const { id } = req.params
+                
+                /* if(!name || !image){
+                    return responseReturn(res, 400, { error: 'Name and Image are required' })
+                } */
+                
+                name = name.trim()
+                const slug = name.split(' ').join('-')
+
+                try{
+                    /* console.log("Uploading to cloudinary...")
+                    console.log("Image filepath: ", image.filepath)
+                    console.log("Cloudinary config: ", {
+                        cloud_name: process.env.cloud_name,
+                        api_key: process.env.api_key ? 'exists' : 'missing',
+                        api_secret: process.env.api_secret ? 'exists' : 'missing'
+                    }) */
+                    
+                    let result = null
+                    if(image){
+                        cloudinary.config({
+                            cloud_name: process.env.cloud_name,
+                            api_key: process.env.api_key,
+                            api_secret: process.env.api_secret,
+                            secure: true
+                        })
+                        result = await cloudinary.uploader.upload(image.filepath, { folder: 'categorys' }) 
+                    }
+
+                    const updateData = {
+                        name,
+                        slug
+                    }
+
+                    if(result){
+                        updateData.image = result.url
+                    }
+
+                    const category = await categoryModel.findByIdAndUpdate(id, updateData, {new: true})
+                    responseReturn(res, 201, { category, message: 'Category Added Successfully' })
+
+                }catch(err){
+                    console.log("Error details: ", err)
+                    console.log("Error message: ", err.message)
+                    console.log("Error stack: ", err.stack)
+                    responseReturn(res, 500, { error: 'Internal Server Error: ' + err.message })
+                }
+                
+            }
+        })
+    }
+
+    delete_category = async (req, res) => {
+        const { id } = req.params
+        
+        try{
+            const deleteCategory = await categoryModel.findByIdAndDelete(id)
+            if(!deleteCategory){
+                responseReturn(res, 400, {message: `Category with id ${id} not found`})
+            }
+
+            responseReturn(res, 200, {message: 'Category deleted successfully'})
+        }catch(error){
+            console.log('Error delete: ', error.message)
+            responseReturn(res, 500, {error: error.message})
         }
     }
     

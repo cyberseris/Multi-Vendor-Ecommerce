@@ -15,7 +15,9 @@ const AdminDashboard = () => {
 
 
     useEffect(()=>{
-        dispatch(get_admin_dashboard_data())
+        if(userInfo){
+            dispatch(get_admin_dashboard_data())
+        }  
     }, [])
     
     const state = {

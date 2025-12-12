@@ -48,7 +48,7 @@ const AdminLogin = () => {
             dispatch(messageClear());
             navigator('/')
         }
-    }, [errorMessage, successMessage, dispatch])
+    }, [errorMessage, successMessage])
 
     return (
         <div className="min-w-screen min-h-screen bg-[#cdcae9] flex items-center justify-center">
