@@ -179,8 +179,6 @@ class dashboardController{
                     }
                 }
             ])
-
-            console.log("banners: ", banners)
             
             responseReturn(res, 200, { banners })
         }catch(error){
