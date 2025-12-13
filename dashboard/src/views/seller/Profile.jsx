@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaImages, FaRegEdit } from 'react-icons/fa';
 import { FadeLoader } from 'react-spinners';
 import { useDispatch, useSelector } from 'react-redux';
-import { profile_image_upload, profile_info_add, messageClear } from '../../store/Reducers/authReducer'
+import { profile_image_upload, profile_info_add, change_password, messageClear } from '../../store/Reducers/authReducer'
 import { create_stripe_connect_account } from '../../store/Reducers/sellerReducer'
 import { PropagateLoader } from 'react-spinners';
 import { overrideStyle } from '../../utils/utils';
@@ -17,7 +17,7 @@ const Profile = () => {
     })
 
     const dispatch = useDispatch()
-    const { userInfo, loader, successMessage } = useSelector(state => state.auth)
+    const { userInfo, loader, successMessage, errorMessage } = useSelector(state => state.auth)
 
     const status = 'active'
 
@@ -26,7 +26,13 @@ const Profile = () => {
             toast.success(successMessage)
             dispatch(messageClear())
         }
-    }, [successMessage]);
+
+        if(errorMessage){
+            toast.error(errorMessage)
+            dispatch(messageClear())
+        }
+
+    }, [successMessage, errorMessage]);
 
 
     const add_image = (e) => {
@@ -48,6 +54,24 @@ const Profile = () => {
     const add = (e) => {
         e.preventDefault()
         dispatch(profile_info_add(state))
+    }
+
+    const [passwordData, setPasswordData] = useState({
+        email: userInfo?.email || "",
+        old_password: "",
+        new_password: ""
+    })
+
+    const passwordHandler = (e) => {
+        setPasswordData({
+            ...passwordData,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    const handlePasswordChange = (e) => {
+        e.preventDefault()
+        dispatch(change_password(passwordData))
     }
 
     return (
@@ -79,12 +103,8 @@ const Profile = () => {
                                 </label>
                             }
                             <input onChange={add_image} type="file" id="img" className='hidden' />
-
-
                         </div>
                         
-
-
                         <div className='px-0 md:px-5 py-2'>
                             <div className='flex justify-between text-sm flex-col gap-2 p-4 bg-slate-800 rounded-md relative'>
                                 <span className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50 absolute right-2 top-2 cursor-pointer'><FaRegEdit /></span>
@@ -180,30 +200,27 @@ const Profile = () => {
                     <div className='w-full pl-0 md:pl-7 mt-6 md:mt-0'>
                         <div className='bg-[#6a5fdf] rounded-md text-[#d0d2d6] p-4'>
                             <h1 className='text-[#d0d2d6] text-lg mb-3 font-semibold'>Change Password</h1>
-                            <form>
+                            <form onSubmit={handlePasswordChange}>
                                 <div className='flex flex-col w-full gap-1 mb-2'> 
                                     <label htmlFor="email">Email</label>
-                                    <input className='px-4 py-2 bg-[#6a5fdf] focus:border-indigo-500/50 outline-none border border-slate-700 rounded-md text-[#d0d2d6]' type="text" name='email' id='email' placeholder='email'  />
+                                    <input className='px-4 py-2 bg-[#6a5fdf] focus:border-indigo-500/50 outline-none border border-slate-700 rounded-md text-[#d0d2d6]' type="text" name='email' id='email' value={passwordData.email ?? ''} onChange={passwordHandler} placeholder='email' />
                                 </div>
                                 <div className='flex flex-col w-full gap-1 mb-2'> 
                                     <label htmlFor="o_password">Old Password</label>
-                                    <input className='px-4 py-2 bg-[#6a5fdf] focus:border-indigo-500/50 outline-none border border-slate-700 rounded-md text-[#d0d2d6]' type="password" name='old_password' id='o_password' placeholder='Old Password'  />
+                                    <input className='px-4 py-2 bg-[#6a5fdf] focus:border-indigo-500/50 outline-none border border-slate-700 rounded-md text-[#d0d2d6]' type="password" name='old_password' id='o_password' value={passwordData.old_password ?? ''} onChange={passwordHandler} placeholder='Old Password'  />
                                 </div>
                                 <div className='flex flex-col w-full gap-1 mb-2'> 
                                     <label htmlFor="n_password">New Password</label>
-                                    <input className='px-4 py-2 bg-[#6a5fdf] focus:border-indigo-500/50 outline-none border border-slate-700 rounded-md text-[#d0d2d6]' type="password" name='new_password' id='n_password' placeholder='New Password' />
+                                    <input className='px-4 py-2 bg-[#6a5fdf] focus:border-indigo-500/50 outline-none border border-slate-700 rounded-md text-[#d0d2d6]' type="password" name='new_password' id='n_password' value={passwordData.new_password ?? ''} onChange={passwordHandler} placeholder='New Password' />
                                 </div>
 
 
-                                <button className='bg-red-500 hover:shadow-red-500/40 hover:shadow-md text-white rounded-md px-7 py-2 my-2'>Save Changes</button>
+                                <button disable={loader} className='bg-red-500 hover:shadow-red-500/40 hover:shadow-md text-white rounded-md px-7 py-2 my-2'>
+                                {loader?'Loading...' : 'Save Changes'}
+                                </button>
                             </form>
 
                         </div>
-
-                        
-
-
-
                     </div>
                 </div>
             </div>

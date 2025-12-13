@@ -121,7 +121,32 @@ class authControllers{
         }
 
         /* res.status(200).json({message: 'Admin login successful'}); */
-    } 
+    }
+
+    //seller
+    change_password = async(req, res) => {
+        /* const {id} = req */
+        const { email, old_password, new_password } = req.body
+        
+        const user = await sellerModel.findOne({email}).select('+password')
+        if(!user) responseReturn(res, 404, {message: 'User not found'}) 
+        
+        const isMatch = await bcrypt.compare(old_password,user.password)
+        if(!isMatch){
+            responseReturn(res, 400, {message: 'Incorrect password'})
+        }
+        
+        user.password = await bcrypt.hash(new_password, 10)
+        console.log()
+
+        try{
+            await user.save()
+            /* $2b$10$5SDcoQl.T.UzQ7/mTAPKDeEXM17MHGD/7tGFSxKZKgNYkN4RZdSnu */
+            responseReturn(res, 200, { message: 'Password changed successfully' })
+        }catch(error){
+            responseReturn(res, 500, { error: error.message })
+        }
+    }
 
     getUser = async (req, res) => {
         const { id, role } = req;

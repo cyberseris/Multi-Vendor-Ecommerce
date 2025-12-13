@@ -116,6 +116,27 @@ export const seller_login = createAsyncThunk(
     }   
 )
 
+//seller
+export const change_password = createAsyncThunk(
+    'auth/change_password', 
+    async(info, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const { data } = await api.patch('/change-password', info, {
+                withCredentials:true
+            });
+
+            localStorage.setItem('accessToken', data.token);
+            
+            console.log("seller_login: ", data);
+            return fulfillWithValue(data);
+
+        }catch(error){
+            console.log(error.response.data); 
+            return rejectWithValue(error.response.data);
+        }
+    }   
+)
+
 export const logout = createAsyncThunk(
     'auth/logout', 
     async({navigate, role}, {rejectWithValue, fulfillWithValue}) => {
@@ -234,6 +255,17 @@ export const authReducer = createSlice({
                 state.loader = false;
                 state.successMessage = payload.message;
                 state.userInfo = payload.userInfo;
+            })
+            .addCase(change_password.pending, (state) => {
+                state.loader = true;
+            })
+            .addCase(change_password.rejected, (state, { payload }) => {
+                state.loader = false;
+                state.errorMessage = payload.error;
+            })
+            .addCase(change_password.fulfilled, (state, { payload }) => {
+                state.loader = false;
+                state.successMessage = payload.message;
             });
             
     }

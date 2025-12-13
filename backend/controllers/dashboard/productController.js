@@ -127,7 +127,6 @@ class productController{
         name = name.trim()
         const slug = name.split(' ').join('-')
 
-
         try{
             await productModel.findByIdAndUpdate(productId, { name, description, stock, price, category, discount, brand, slug })
 
